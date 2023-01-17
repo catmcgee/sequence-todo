@@ -25,10 +25,9 @@ function App() {
   const deleteTask = (key) => async () => {
 
     // Delete the task in position 'key'
-    console.log('keyy', key);
-    const array = tasks;
-    array.splice(key,1);
-    setTasks([...array]);
+    const newTasks = tasks;
+    newTasks.splice(key,1);
+    setTasks([...newTasks]);
   };
 
   return (
