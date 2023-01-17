@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { TextField, Button } from '@mui/material';
-import './App.css';
 import { sequence } from '0xsequence';
 import { ethers } from 'ethers';
 import TodoAbi from './utils/Todo.json';
@@ -134,26 +133,27 @@ function App() {
     }
   };
 
-  const newLocal = 'bg-';
   return (
-    <div>
+    <div className=''>
       {currentAccount === '' ? (
-        <button
-          type="submit"
-          className="text-2xl font-bold py-3 px-12 bg-[#f1c232] rounded-lg mb-10 hover:scale-105 transition duration-500 ease-in-out"
-          onClick={connectWallet}
-        >
-          Connect Wallet
-        </button>
+        <div className="flex items-center justify-center h-screen">
+          <button
+            type="submit"
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            onClick={connectWallet}
+          >
+            Connect Wallet
+          </button>
+        </div>
       ) : (
-        <div className="App">
-          <h2> Task Management App</h2>
-          <form>
+        <div className="flex flex-col items-center justify-center h-screen">
+          <h2 className='font-sans font-semibold text-lg mb-3'> Task Management App</h2>
+          <form className=''>
             <TextField
               id="outlined-basic"
               label="Make Todo"
               variant="outlined"
-              style={{ margin: '0px 5px' }}
+              style={{ margin: '0px 10px' }}
               size="small"
               value={input}
               onChange={(e) => setInput(e.target.value)}
