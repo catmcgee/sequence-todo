@@ -29,5 +29,6 @@ module.exports = {
     // disable rules from base configurations
     'for-direction': 'off',
     'jsx-filename-extension': 'off',
+    'react/prop-types': 'off'
   },
 };
