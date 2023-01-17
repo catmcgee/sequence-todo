@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { TextField, Button } from '@mui/material';
-import './App.css';
 import { sequence } from '0xsequence';
 import { ethers } from 'ethers';
 import TodoAbi from './utils/Todo.json';
@@ -11,15 +10,20 @@ function App() {
   const [tasks, setTasks] = useState([]);
   const [input, setInput] = useState('');
   const [currentAccount, setCurrentAccount] = useState('');
-  const [correctNetwork, setCorrectNetwork] = useState(false);
   const goerliChainId = '0x05';
+
+  // This assumes your dapp runs on Goerli and initiates the sequence wallet
   sequence.initWallet('goerli');
 
+  // Calls the contract to get all current tasks and loads it in the State
   const getAllTasks = async () => {
     try {
       const wallet = sequence.getWallet();
+
       if (wallet) {
-        const signer = wallet.getSigner(5);
+
+        const signer = wallet.getSigner();
+
         const TaskContract = new ethers.Contract(
           TodoContractAddress,
           TodoAbi.abi,
@@ -27,7 +31,9 @@ function App() {
         );
 
         const allTasks = await TaskContract.getMyTasks();
+
         setTasks(allTasks);
+
       } else {
         console.log('Not signed in');
       }
@@ -36,11 +42,8 @@ function App() {
     }
   };
 
-  useEffect(() => {
-    getAllTasks();
-  }, []);
 
-  // Calls Sequence to connect wallet
+  // Calls Sequence to connect wallet and update if there are any tasks already
   const connectWallet = async () => {
     const wallet = sequence.getWallet();
 
@@ -55,15 +58,13 @@ function App() {
 
     console.log(connectDetails);
 
-    if (connectDetails.chainId === goerliChainId) {
-      setCorrectNetwork(true);
-    }
     if (!connectDetails.connected) {
       console.log('User wallet not connected. Error:', connectDetails.error);
     } else if (connectDetails.connected) {
       console.log('Users signed connect proof to valid their account address:', connectDetails.proof);
     }
 
+    getAllTasks();
     setCurrentAccount(connectDetails.session.accountDetails);
   };
 
@@ -79,7 +80,7 @@ function App() {
       const wallet = sequence.getWallet();
 
       if (wallet) {
-        const signer = wallet.getSigner(5);
+        const signer = wallet.getSigner(goerliChainId);
         const TaskContract = new ethers.Contract(
           TodoContractAddress,
           TodoAbi.abi,
@@ -98,21 +99,21 @@ function App() {
         console.log('Ethereum object doesn\'t exist!');
       }
     } catch (error) {
-      console.log('Error submitting new Tweet', error);
+      console.log('Error submitting new TODO', error);
     }
 
     setInput('');
   };
 
   const deleteTask = (key) => async () => {
-    console.log(key);
 
-    // Now we got the key, let's delete our todo
+    // The key of our TODO is the index in the smart contract which should be the same as the index in our React state.
     try {
       const wallet = sequence.getWallet();
 
       if (wallet) {
         const signer = wallet.getSigner();
+
         const TaskContract = new ethers.Contract(
           TodoContractAddress,
           TodoAbi.abi,
@@ -120,7 +121,9 @@ function App() {
         );
 
         await TaskContract.deleteTask(key, true);
+
         const allTasks = await TaskContract.getMyTasks();
+
         setTasks(allTasks);
       } else {
         console.log('Ethereum object doesn\'t exist');
@@ -131,24 +134,26 @@ function App() {
   };
 
   return (
-    <div>
+    <div className=''>
       {currentAccount === '' ? (
-        <button
-          type="submit"
-          className="text-2xl font-bold py-3 px-12 bg-[#f1c232] rounded-lg mb-10 hover:scale-105 transition duration-500 ease-in-out"
-          onClick={connectWallet}
-        >
-          Connect Wallet
-        </button>
-      ) : correctNetwork ? (
-        <div className="App">
-          <h2> Task Management App</h2>
-          <form>
+        <div className="flex items-center justify-center h-screen">
+          <button
+            type="submit"
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            onClick={connectWallet}
+          >
+            Connect Wallet
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center h-screen">
+          <h2 className='font-sans font-semibold text-lg mb-3'> Task Management App</h2>
+          <form className=''>
             <TextField
               id="outlined-basic"
               label="Make Todo"
               variant="outlined"
-              style={{ margin: '0px 5px' }}
+              style={{ margin: '0px 10px' }}
               size="small"
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -156,21 +161,14 @@ function App() {
             <Button variant="contained" color="primary" onClick={addTask}>Add Task</Button>
           </form>
           <ul>
-            {tasks.map((item) => (
+            {tasks.map((item, index) => (
               <Task
-                key={item.id}
+                key={index}
                 taskText={item.taskText}
                 onClick={deleteTask(item.id)}
               />
             ))}
           </ul>
-        </div>
-      ) : (
-        <div className="flex flex-col justify-center items-center mb-20 font-bold text-2xl gap-y-3">
-          <div>----------------------------------------</div>
-          <div>Not connected to Goerli Testnet</div>
-          <div>and reload the page</div>
-          <div>----------------------------------------</div>
         </div>
       )}
     </div>
