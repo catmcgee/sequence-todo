@@ -6,10 +6,7 @@ function App() {
   const [tasks, setTasks] = useState([]);
   const [input, setInput] = useState('');
 
-  useEffect(() => {
-    console.log(tasks);
-  }, [tasks.length]);
-
+  // Adds a task to the state
   const addTask = async (e) => {
     e.preventDefault();
 
@@ -22,9 +19,8 @@ function App() {
     setInput('');
   };
 
+  // Delete the task in position 'key' from the state
   const deleteTask = (key) => async () => {
-
-    // Delete the task in position 'key'
     const newTasks = tasks;
     newTasks.splice(key,1);
     setTasks([...newTasks]);
